@@ -6,7 +6,6 @@ const con = require('../../../../helpers/mysql')
 router.post('/', async (req, res) => {
   const trail = req.body.trail
   const username = req.cookies.username
-  console.log(username, trail)
   if (trail && username) {
     // First we will make sure that trail exists in steemauto
     const trailExists = await con.query(
