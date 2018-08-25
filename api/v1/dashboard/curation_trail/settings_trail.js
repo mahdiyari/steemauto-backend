@@ -27,10 +27,11 @@ router.post('/', async (req, res) => {
         )
         if (exists) {
           // Updating database with new valid settings then printing the result
+          const weight2 = weight * 100
           await con.query(
             'UPDATE `followers` SET `weight`=?, `aftermin`=?, `votingway`=?, `enable`=?' +
             'WHERE `trailer`=? AND `follower`=?',
-            [weight, minute, votingway, enable, trail, username]
+            [weight2, minute, votingway, enable, trail, username]
           )
           res.json({
             id: 1,
