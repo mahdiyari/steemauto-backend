@@ -6,6 +6,7 @@ const app = express()
 const isAuth = require('./middlewares/is_auth')
 const curationTrail = require('./api/v1/dashboard/curation_trail')
 const fanbase = require('./api/v1/dashboard/fanbase')
+const schedulePost = require('./api/v1/dashboard/schedule_post')
 
 // support json encoded bodies and encoded bodies
 app.use(bodyParser.json())
@@ -19,6 +20,7 @@ app.use(hpp())
 app.use(isAuth)
 app.use('/api/v1/dashboard/curation_trail', curationTrail)
 app.use('/api/v1/dashboard/fanbase', fanbase)
+app.use('/api/v1/dashboard/schedule_post', schedulePost)
 
 const port = process.env.PORT || 3001
 const host = process.env.HOST || '127.0.0.1'
