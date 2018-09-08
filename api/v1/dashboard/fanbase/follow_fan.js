@@ -20,33 +20,41 @@ router.post('/', async (req, res) => {
       fanExists = fanExists[0][i]
     }
     if (fanExists) {
-      // we will make sure user is not already followed that fan
-      let exists = await con.query(
-        'SELECT EXISTS(SELECT `follower` FROM `fanbase` WHERE `fan`=? AND `follower`=?)',
-        [fan, username]
-      )
-      for (let i in exists[0]) {
-        exists = exists[0][i]
-      }
-      if (!exists) {
-        // Follow fan and increase the number of followers
-        await con.query(
-          'INSERT INTO `fanbase`(`fan`,`follower`,`weight`) VALUES (?,?,"10000")',
-          [fan, username]
-        )
-        await con.query(
-          'UPDATE `fans` SET `followers`=`followers`+1 WHERE `fan`=?',
-          [fan]
-        )
-        res.json({
-          id: 1,
-          result: 'Successfully followed with default settings!'
-        })
-      } else {
+      // the user should not follow himself
+      if (fan === username) {
         res.json({
           id: 0,
-          error: 'Already followed!'
+          error: 'You can not follow yourself!'
         })
+      } else {
+        // we will make sure user is not already followed that fan
+        let exists = await con.query(
+          'SELECT EXISTS(SELECT `follower` FROM `fanbase` WHERE `fan`=? AND `follower`=?)',
+          [fan, username]
+        )
+        for (let i in exists[0]) {
+          exists = exists[0][i]
+        }
+        if (!exists) {
+          // Follow fan and increase the number of followers
+          await con.query(
+            'INSERT INTO `fanbase`(`fan`,`follower`,`weight`) VALUES (?,?,"10000")',
+            [fan, username]
+          )
+          await con.query(
+            'UPDATE `fans` SET `followers`=`followers`+1 WHERE `fan`=?',
+            [fan]
+          )
+          res.json({
+            id: 1,
+            result: 'Successfully followed with default settings!'
+          })
+        } else {
+          res.json({
+            id: 0,
+            error: 'Already followed!'
+          })
+        }
       }
     } else {
       // fan is not in the database
