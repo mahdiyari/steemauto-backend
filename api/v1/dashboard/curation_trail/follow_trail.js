@@ -18,33 +18,41 @@ router.post('/', async (req, res) => {
       trailExists = trailExists[0][i]
     }
     if (trailExists) {
-      // we will make sure user is not already followed that trail
-      let exists = await con.query(
-        'SELECT EXISTS(SELECT `follower` FROM `followers` WHERE `trailer`=? AND `follower`=?)',
-        [trail, username]
-      )
-      for (let i in exists[0]) {
-        exists = exists[0][i]
-      }
-      if (!exists) {
-        // Follow trail and increase the number of followers
-        await con.query(
-          'INSERT INTO `followers`(`trailer`,`follower`,`weight`) VALUES (?,?,"5000")',
-          [trail, username]
-        )
-        await con.query(
-          'UPDATE `trailers` SET `followers`=`followers`+1 WHERE `user`=?',
-          [trail]
-        )
-        res.json({
-          id: 1,
-          result: 'Successfully followed with default settings!'
-        })
-      } else {
+      // the user should not follow himself
+      if (trail === username) {
         res.json({
           id: 0,
-          error: 'Already followed!'
+          error: 'You can not follow yourself!'
         })
+      } else {
+        // we will make sure user is not already followed that trail
+        let exists = await con.query(
+          'SELECT EXISTS(SELECT `follower` FROM `followers` WHERE `trailer`=? AND `follower`=?)',
+          [trail, username]
+        )
+        for (let i in exists[0]) {
+          exists = exists[0][i]
+        }
+        if (!exists) {
+          // Follow trail and increase the number of followers
+          await con.query(
+            'INSERT INTO `followers`(`trailer`,`follower`,`weight`) VALUES (?,?,"5000")',
+            [trail, username]
+          )
+          await con.query(
+            'UPDATE `trailers` SET `followers`=`followers`+1 WHERE `user`=?',
+            [trail]
+          )
+          res.json({
+            id: 1,
+            result: 'Successfully followed with default settings!'
+          })
+        } else {
+          res.json({
+            id: 0,
+            error: 'Already followed!'
+          })
+        }
       }
     } else {
       res.json({
