@@ -5,7 +5,8 @@ const config = {
     pw: 'mysql',
     name: 'steemauto',
     charset: 'utf8mb4'
-  }
+  },
+  nodeURL: 'https://api.steemit.com'
 }
 
 module.exports = config
