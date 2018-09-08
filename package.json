@@ -27,6 +27,7 @@
     "cookie-parser": "^1.4.3",
     "express": "^4.16.3",
     "hpp": "^0.2.2",
-    "mysql": "^2.16.0"
+    "mysql": "^2.16.0",
+    "node-fetch": "^2.2.0"
   }
 }
