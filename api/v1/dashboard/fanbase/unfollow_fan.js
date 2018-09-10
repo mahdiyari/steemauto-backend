@@ -8,16 +8,24 @@ router.post('/', async (req, res) => {
   const username = req.cookies.username
   if (fan && username) {
     // First we will make sure that fan exists in steemauto
-    const fanExists = await con.query(
+    let fanExists = await con.query(
       'SELECT EXISTS(SELECT `fan` FROM `fans` WHERE `fan`=?)',
       [fan]
     )
+    // MySQL will return result like: [{query: result}]
+    // We should select result
+    for (let i in fanExists[0]) {
+      fanExists = fanExists[0][i]
+    }
     if (fanExists) {
       // we will make sure user is already followed that fan
-      const exists = await con.query(
+      let exists = await con.query(
         'SELECT EXISTS(SELECT `follower` FROM `fanbase` WHERE `fan`=? AND `follower`=?)',
         [fan, username]
       )
+      for (let i in exists[0]) {
+        exists = exists[0][i]
+      }
       if (exists) {
         // unfollow fan and decrease the number of followers
         await con.query(

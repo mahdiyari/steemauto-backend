@@ -8,10 +8,15 @@ router.post('/', async (req, res) => {
   const username = req.cookies.username
   if (description && username) {
     // First we will make sure this user is not already a trail
-    const trailExists = await con.query(
+    let trailExists = await con.query(
       'SELECT EXISTS(SELECT `user` FROM `trailers` WHERE `user`=?)',
       [username]
     )
+    // MySQL will return result like: [{query: result}]
+    // We should select result
+    for (let i in trailExists[0]) {
+      trailExists = trailExists[0][i]
+    }
     if (!trailExists) {
       // we will insert this user to the trails list
       await con.query(

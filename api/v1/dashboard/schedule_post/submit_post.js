@@ -9,7 +9,7 @@ router.post('/', async (req, res) => {
   const date = req.body.date
   const title = req.body.title
   const content = req.body.content
-  const tags = req.body.tags
+  const tags = JSON.parse(req.body.tags)
   const rewardsType = req.body.rewardstype
   const upvotePost = req.body.upvotepost
   if (username && date && title && content && tags && rewardsType && upvotePost) {
@@ -50,6 +50,9 @@ router.post('/', async (req, res) => {
 // this function will return true(1) if params was not in the expected format
 const isError = (date, tags, rewardsType, upvotePost) => {
   if (!isNaN(date) && !isNaN(rewardsType) && !isNaN(upvotePost) && Array.isArray(tags)) {
+    date = Number(date)
+    rewardsType = Number(rewardsType)
+    upvotePost = Number(upvotePost)
     // date should be between 1 and 168 hours (7days)
     if (date < 1 && date > 168) {
       return 1

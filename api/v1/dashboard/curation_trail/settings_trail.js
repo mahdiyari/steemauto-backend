@@ -15,16 +15,24 @@ router.post('/', async (req, res) => {
     const error = await isError(weight, minute, enable, votingway)
     if (!error) {
       // First we will make sure that trail exists in steemauto
-      const trailExists = await con.query(
+      let trailExists = await con.query(
         'SELECT EXISTS(SELECT `user` FROM `trailers` WHERE `user`=?)',
         [trail]
       )
+      // MySQL will return result like: [{query: result}]
+      // We should select result
+      for (let i in trailExists[0]) {
+        trailExists = trailExists[0][i]
+      }
       if (trailExists) {
         // we will make sure user is following that trail
-        const exists = await con.query(
+        let exists = await con.query(
           'SELECT EXISTS(SELECT `follower` FROM `followers` WHERE `trailer`=? AND `follower`=?)',
           [trail, username]
         )
+        for (let i in exists[0]) {
+          exists = exists[0][i]
+        }
         if (exists) {
           // Updating database with new valid settings then printing the result
           const weight2 = weight * 100
@@ -58,7 +66,7 @@ router.post('/', async (req, res) => {
   } else {
     res.json({
       id: 0,
-      result: 'required params missed'
+      error: 'required params missed'
     })
   }
 })
@@ -66,6 +74,10 @@ router.post('/', async (req, res) => {
 // this function will return true(1) if there was any wrong parameter
 const isError = async (weight, minute, enable, votingway) => {
   if (!isNaN(weight) && !isNaN(minute) && !isNaN(enable) && !isNaN(votingway)) {
+    weight = Number(weight)
+    minute = Number(minute)
+    enable = Number(enable)
+    votingway = Number(votingway)
     // minute should be between 0 and 30
     if (minute < 0 || minute > 30) {
       return 1

@@ -8,11 +8,16 @@ router.post('/', async (req, res) => {
   const username = req.cookies.username
   const postId = req.body.id
   if (username && postId) {
-    if (!isNaN(postId) && postId > 0) {
-      const postExists = await con.query(
+    if (!isNaN(postId) && Number(postId) > 0) {
+      let postExists = await con.query(
         'SELECT EXISTS(SELECT * FROM `posts` WHERE `user`=? AND `id`=?)',
         [username, postId]
       )
+      // MySQL will return result like: [{query: result}]
+      // We should select result
+      for (let i in postExists[0]) {
+        postExists = postExists[0][i]
+      }
       if (postExists) {
         await con.query(
           'DELETE FROM `posts` WHERE `posts`.`id` =?',

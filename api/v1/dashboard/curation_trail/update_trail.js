@@ -7,18 +7,26 @@ router.post('/', async (req, res) => {
   const username = req.cookies.username
   if (username) {
     // First we will make sure this user is a trail
-    const trailExists = await con.query(
+    let trailExists = await con.query(
       'SELECT EXISTS(SELECT `user` FROM `trailers` WHERE `user`=?)',
       [username]
     )
+    // MySQL will return result like: [{query: result}]
+    // We should select result
+    for (let i in trailExists[0]) {
+      trailExists = trailExists[0][i]
+    }
     if (trailExists) {
       // we will toggle between disable/enable
       const result = await con.query(
         'SELECT `enable` FROM `trailers` WHERE `user`=?',
         [username]
       )
-      const enable = result[0].enable
+      let enable = result[0].enable
       let changeEnable
+      if (!isNaN(enable)) {
+        enable = Number(enable)
+      }
       if (enable === 1) {
         changeEnable = 0
       } else {
@@ -35,7 +43,7 @@ router.post('/', async (req, res) => {
     } else {
       res.json({
         id: 0,
-        result: 'you are not a trail!'
+        error: 'you are not a trail!'
       })
     }
   } else {

@@ -15,16 +15,24 @@ router.post('/', async (req, res) => {
     const error = await isError(weight, minute, enable, dailylimit)
     if (!error) {
       // First we will make sure that fan exists in steemauto
-      const fanExists = await con.query(
+      let fanExists = await con.query(
         'SELECT EXISTS(SELECT `fan` FROM `fans` WHERE `fan`=?)',
         [fan]
       )
+      // MySQL will return result like: [{query: result}]
+      // We should select result
+      for (let i in fanExists[0]) {
+        fanExists = fanExists[0][i]
+      }
       if (fanExists) {
         // we will make sure user is following that fan
-        const exists = await con.query(
+        let exists = await con.query(
           'SELECT EXISTS(SELECT `fan` FROM `fanbase` WHERE `fan`=? AND `follower`=?)',
           [fan, username]
         )
+        for (let i in exists[0]) {
+          exists = exists[0][i]
+        }
         if (exists) {
           // Updating database with new valid settings then printing the result
           const weight2 = weight * 100
@@ -58,7 +66,7 @@ router.post('/', async (req, res) => {
   } else {
     res.json({
       id: 0,
-      result: 'required params missed'
+      error: 'required params missed'
     })
   }
 })
@@ -66,6 +74,10 @@ router.post('/', async (req, res) => {
 // this function will return true(1) if there was any wrong parameter
 const isError = async (weight, minute, enable, dailylimit) => {
   if (!isNaN(weight) && !isNaN(minute) && !isNaN(enable) && !isNaN(dailylimit)) {
+    weight = Number(weight)
+    minute = Number(minute)
+    enable = Number(enable)
+    dailylimit = Number(dailylimit)
     // minute should be between 0 and 30
     if (minute < 0 || minute > 30) {
       return 1

@@ -8,16 +8,24 @@ router.post('/', async (req, res) => {
   const username = req.cookies.username
   if (trail && username) {
     // First we will make sure that trail exists in steemauto
-    const trailExists = await con.query(
+    let trailExists = await con.query(
       'SELECT EXISTS(SELECT `user` FROM `trailers` WHERE `user`=?)',
       [trail]
     )
+    // MySQL will return result like: [{query: result}]
+    // We should select result
+    for (let i in trailExists[0]) {
+      trailExists = trailExists[0][i]
+    }
     if (trailExists) {
       // we will make sure user is following that trail
-      const exists = await con.query(
+      let exists = await con.query(
         'SELECT EXISTS(SELECT `follower` FROM `followers` WHERE `trailer`=? AND `follower`=?)',
         [trail, username]
       )
+      for (let i in exists[0]) {
+        exists = exists[0][i]
+      }
       if (exists) {
         // Unfollow trail and decrease the number of followers
         await con.query(
