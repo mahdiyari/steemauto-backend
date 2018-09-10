@@ -7,21 +7,37 @@ router.post('/', async (req, res) => {
   const username = req.cookies.username
   const title = req.body.title
   const content = req.body.content
-  const tags = req.body.tags
+  const tags = JSON.parse(req.body.tags)
   const postId = req.body.id
   if (username && title && content && tags && postId) {
     const permlink = createPermlink(title)
     // checking parameters
-    const error = isError(tags)
+    const error = isError(tags, postId)
     if (!error) {
-      await con.query(
-        'UPDATE `posts` SET `title`=?, `content`=?, `maintag`=?, `permlink`=? WHERE `id`=? AND `user`=?',
-        [title, content, tags[0], permlink, postId, username]
+      let postExists = await con.query(
+        'SELECT EXISTS(SELECT * FROM `posts` WHERE `user`=? AND `id`=?)',
+        [username, postId]
       )
-      res.json({
-        id: 1,
-        result: 'Successfully edited'
-      })
+      // MySQL will return result like: [{query: result}]
+      // We should select result
+      for (let i in postExists[0]) {
+        postExists = postExists[0][i]
+      }
+      if (postExists) {
+        await con.query(
+          'UPDATE `posts` SET `title`=?, `content`=?, `maintag`=?, `permlink`=? WHERE `id`=? AND `user`=?',
+          [title, content, tags[0], permlink, postId, username]
+        )
+        res.json({
+          id: 1,
+          result: 'Successfully edited'
+        })
+      } else {
+        res.json({
+          id: 0,
+          error: 'Post not found'
+        })
+      }
     } else {
       res.json({
         id: 0,
@@ -38,7 +54,7 @@ router.post('/', async (req, res) => {
 
 // this function will return true(1) if params was not in the expected format
 const isError = (tags, postId) => {
-  if (Array.isArray(tags) && !isNaN(postId) && postId > 0) {
+  if (Array.isArray(tags) && !isNaN(postId) && Number(postId) > 0) {
     // we accept up to 5 tags
     if (tags.length < 1 && tags.length > 5) {
       return 1
