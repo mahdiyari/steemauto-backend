@@ -17,7 +17,7 @@ router.post('/', async (req, res) => {
     if (exists) {
       await con.query(
         'DELETE FROM `commentupvote` WHERE `user`=? AND `commenter`=?',
-        [username && userToDelete]
+        [username, userToDelete]
       )
       res.json({
         id: 1,
