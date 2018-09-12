@@ -60,7 +60,7 @@ const isError = (weight, minute, enable) => {
     if (minute < 0 || minute > 30) {
       return true
     }
-    if (enable !== 0 || enable !== 1) {
+    if (enable !== 0 && enable !== 1) {
       return true
     }
     return false
