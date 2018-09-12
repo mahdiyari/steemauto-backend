@@ -86,3 +86,5 @@ const isError = (weight, minute) => {
     return true
   }
 }
+
+module.exports = router
