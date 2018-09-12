@@ -54,7 +54,7 @@ const isError = (date, tags, rewardsType, upvotePost) => {
     rewardsType = Number(rewardsType)
     upvotePost = Number(upvotePost)
     // date should be between 1 and 168 hours (7days)
-    if (date < 1 && date > 168) {
+    if (date < 1 || date > 168) {
       return 1
     }
     // 0: default 50/50, 1: 100% powerup, 2: decline payout
@@ -66,7 +66,7 @@ const isError = (date, tags, rewardsType, upvotePost) => {
       return 1
     }
     // we accept up to 5 tags
-    if (tags.length < 1 && tags.length > 5) {
+    if (tags.length < 1 || tags.length > 5) {
       return 1
     }
     return 0

@@ -56,7 +56,7 @@ router.post('/', async (req, res) => {
 const isError = (tags, postId) => {
   if (Array.isArray(tags) && !isNaN(postId) && Number(postId) > 0) {
     // we accept up to 5 tags
-    if (tags.length < 1 && tags.length > 5) {
+    if (tags.length < 1 || tags.length > 5) {
       return 1
     }
     return 0

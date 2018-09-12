@@ -12,7 +12,7 @@ router.post('/', async (req, res) => {
   const username = req.cookies.username
   if (fan && username && weight && minute && enable && dailylimit) {
     // we will apply settings if parameters was in expected format
-    const error = await isError(weight, minute, enable, dailylimit)
+    const error = isError(weight, minute, enable, dailylimit)
     if (!error) {
       // First we will make sure that fan exists in steemauto
       let fanExists = await con.query(
@@ -72,7 +72,7 @@ router.post('/', async (req, res) => {
 })
 
 // this function will return true(1) if there was any wrong parameter
-const isError = async (weight, minute, enable, dailylimit) => {
+const isError = (weight, minute, enable, dailylimit) => {
   if (!isNaN(weight) && !isNaN(minute) && !isNaN(enable) && !isNaN(dailylimit)) {
     weight = Number(weight)
     minute = Number(minute)
@@ -83,7 +83,7 @@ const isError = async (weight, minute, enable, dailylimit) => {
       return 1
     }
     // weight should be between 0.01 and 100
-    if (weight < 0.01 && weight > 100) {
+    if (weight < 0.01 || weight > 100) {
       return 1
     }
     // enable is 1 or 0
@@ -91,7 +91,7 @@ const isError = async (weight, minute, enable, dailylimit) => {
       return 1
     }
     // dailylimit is between 1 and 99
-    if (dailylimit < 1 && dailylimit > 99) {
+    if (dailylimit < 1 || dailylimit > 99) {
       return 1
     }
     // all parameters are in the expected format
