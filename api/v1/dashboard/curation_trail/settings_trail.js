@@ -12,7 +12,7 @@ router.post('/', async (req, res) => {
   const username = req.cookies.username
   if (trail && username && weight && minute && enable && votingway) {
     // we will apply settings if parameters was in expected format
-    const error = await isError(weight, minute, enable, votingway)
+    const error = isError(weight, minute, enable, votingway)
     if (!error) {
       // First we will make sure that trail exists in steemauto
       let trailExists = await con.query(
@@ -72,7 +72,7 @@ router.post('/', async (req, res) => {
 })
 
 // this function will return true(1) if there was any wrong parameter
-const isError = async (weight, minute, enable, votingway) => {
+const isError = (weight, minute, enable, votingway) => {
   if (!isNaN(weight) && !isNaN(minute) && !isNaN(enable) && !isNaN(votingway)) {
     weight = Number(weight)
     minute = Number(minute)
@@ -83,7 +83,7 @@ const isError = async (weight, minute, enable, votingway) => {
       return 1
     }
     // weight should be between 0.01 and 100
-    if (weight < 0.01 && weight > 100) {
+    if (weight < 0.01 || weight > 100) {
       return 1
     }
     // enable is 1 or 0
