@@ -4,10 +4,12 @@ const cookieParser = require('cookie-parser')
 const hpp = require('hpp')
 const app = express()
 const isAuth = require('./middlewares/is_auth')
+
 const curationTrail = require('./api/v1/dashboard/curation_trail')
 const fanbase = require('./api/v1/dashboard/fanbase')
 const schedulePost = require('./api/v1/dashboard/schedule_post')
 const commentUpvote = require('./api/v1/dashboard/comment_upvote')
+const claimReward = require('./api/v1/dashboard/claim_reward')
 
 // support json encoded bodies and encoded bodies
 app.use(bodyParser.json())
@@ -23,6 +25,7 @@ app.use('/api/v1/dashboard/curation_trail', curationTrail)
 app.use('/api/v1/dashboard/fanbase', fanbase)
 app.use('/api/v1/dashboard/schedule_post', schedulePost)
 app.use('/api/v1/dashboard/comment_upvote', commentUpvote)
+app.use('/api/v1/dashboard/claim_reward', claimReward)
 
 const port = process.env.PORT || 3001
 const host = process.env.HOST || '127.0.0.1'
