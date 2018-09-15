@@ -10,6 +10,7 @@ const schedulePost = require('./api/v1/dashboard/schedule_post')
 const commentUpvote = require('./api/v1/dashboard/comment_upvote')
 const claimReward = require('./api/v1/dashboard/claim_reward')
 const loginMethod = require('./api/v1/login')
+const logoutMethod = require('./api/v1/logout')
 
 // support json encoded bodies and encoded bodies
 app.use(bodyParser.json())
@@ -25,6 +26,7 @@ app.use('/api/v1/dashboard/schedule_post', schedulePost)
 app.use('/api/v1/dashboard/comment_upvote', commentUpvote)
 app.use('/api/v1/dashboard/claim_reward', claimReward)
 app.use('/api/v1/login', loginMethod)
+app.use('/api/v1/logout', logoutMethod)
 
 const port = process.env.PORT || 3001
 const host = process.env.HOST || '127.0.0.1'
