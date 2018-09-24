@@ -11,6 +11,8 @@ const commentUpvote = require('./api/v1/dashboard/comment_upvote')
 const claimReward = require('./api/v1/dashboard/claim_reward')
 const loginMethod = require('./api/v1/login')
 const logoutMethod = require('./api/v1/logout')
+// Processing backend processes (private api)
+const v2Function = require('./api/v2/function')
 
 // support json encoded bodies and encoded bodies
 app.use(bodyParser.json())
@@ -27,6 +29,8 @@ app.use('/api/v1/dashboard/comment_upvote', commentUpvote)
 app.use('/api/v1/dashboard/claim_reward', claimReward)
 app.use('/api/v1/login', loginMethod)
 app.use('/api/v1/logout', logoutMethod)
+
+app.use('/api/v2/function', v2Function)
 
 const port = process.env.PORT || 3001
 const host = process.env.HOST || '127.0.0.1'
