@@ -11,10 +11,11 @@ router.post('/', async (req, res) => {
   const content = req.body.content
   const tags = JSON.parse(req.body.tags)
   const rewardsType = req.body.rewardstype
+  const beneficiaryType = req.body.beneficiarytype
   const upvotePost = req.body.upvotepost
-  if (username && date && title && content && tags && rewardsType && upvotePost) {
+  if (username && date && title && content && tags && rewardsType && beneficiaryType && upvotePost) {
     // checking parameters
-    const error = isError(date, tags, rewardsType, upvotePost)
+    const error = isError(date, tags, rewardsType, beneficiaryType, upvotePost)
     if (!error) {
       const permlink = createPermlink(title)
       // creating json_metadata
@@ -25,9 +26,9 @@ router.post('/', async (req, res) => {
       const now = Math.floor(nowSec)
       const postDate = now + (date * 3600)
       await con.query(
-        'INSERT INTO `posts`(`user`, `title`, `content`, `date`,`maintag`, `json`, `permlink`, `upvote`, `rewards`)' +
-        'VALUES (?,?,?,?,?,?,?,?,?)',
-        [username, title, content, postDate, tags[0], jsonMetadata, permlink, upvotePost, rewardsType]
+        'INSERT INTO `posts`(`user`, `title`, `content`, `date`,`maintag`, `json`, `permlink`, `upvote`, `rewards`, `beneficiary`)' +
+        'VALUES (?,?,?,?,?,?,?,?,?,?)',
+        [username, title, content, postDate, tags[0], jsonMetadata, permlink, upvotePost, rewardsType, beneficiaryType]
       )
       res.json({
         id: 1,
@@ -48,10 +49,11 @@ router.post('/', async (req, res) => {
 })
 
 // this function will return true(1) if params was not in the expected format
-const isError = (date, tags, rewardsType, upvotePost) => {
-  if (!isNaN(date) && !isNaN(rewardsType) && !isNaN(upvotePost) && Array.isArray(tags)) {
+const isError = (date, tags, rewardsType, beneficiaryType, upvotePost) => {
+  if (!isNaN(date) && !isNaN(rewardsType) && !isNaN(beneficiaryType) && !isNaN(upvotePost) && Array.isArray(tags)) {
     date = Number(date)
     rewardsType = Number(rewardsType)
+    beneficiaryType = Number(beneficiaryType)
     upvotePost = Number(upvotePost)
     // date should be between 1 and 168 hours (7days)
     if (date < 1 || date > 168) {
@@ -59,6 +61,9 @@ const isError = (date, tags, rewardsType, upvotePost) => {
     }
     // 0: default 50/50, 1: 100% powerup, 2: decline payout
     if (rewardsType !== 0 && rewardsType !== 1 && rewardsType !== 2) {
+      return 1
+    }
+    if (beneficiaryType < 0 || beneficiaryType > 25) {
       return 1
     }
     // 0: don't upvote, 1: upvote after publishing

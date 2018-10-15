@@ -60,7 +60,7 @@ router.post('/', async (req, res) => {
       // fan is not in the database
       // we will insert that fan to the database after checking fan's username
       // then follow and increase the number of followers
-      const result = await call(config.nodeURL, 'get_accounts', [[fan]])
+      const result = await call(config.nodeURL, 'condenser_api.get_accounts', [[fan]])
       if (result.length) {
         await con.query(
           'INSERT INTO `fans`(`fan`) VALUES (?)',
