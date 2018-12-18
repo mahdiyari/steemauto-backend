@@ -2,9 +2,9 @@
 const selectExists = (result) => {
   for (let i in result[0]) {
     if (result[0][i]) {
-      return true
+      return 1
     } else {
-      return false
+      return 0
     }
   }
 }

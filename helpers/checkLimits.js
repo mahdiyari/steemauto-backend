@@ -3,10 +3,10 @@
  * one limitation is configured Mana
  * and another limitation is effective SP of each upvote
  */
-const call = require('./nodeCall')
+const call = require('../helpers/nodeCall')
 const config = require('../config')
-const con = require('../mysql')
-const queue = require('./queue')
+const con = require('../helpers/mysql')
+const queue = require('../helpers/queue')
 const isSteemd = config.isSteemd
 // we are using isSteemd to change methods for appbase
 
