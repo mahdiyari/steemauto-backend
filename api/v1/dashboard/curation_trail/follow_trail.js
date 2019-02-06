@@ -1,6 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const con = require('../../../../helpers/mysql')
+const call = require('../../../../helpers/nodeCall')
+const config = require('../../../../config')
 
 // user wants to follow a trail
 router.post('/', async (req, res) => {
@@ -35,14 +37,7 @@ router.post('/', async (req, res) => {
         }
         if (!exists) {
           // Follow trail and increase the number of followers
-          await con.query(
-            'INSERT INTO `followers`(`trailer`,`follower`,`weight`) VALUES (?,?,"5000")',
-            [trail, username]
-          )
-          await con.query(
-            'UPDATE `trailers` SET `followers`=`followers`+1 WHERE `user`=?',
-            [trail]
-          )
+          await followTrail(trail, username)
           res.json({
             id: 1,
             result: 'Successfully followed with default settings!'
@@ -55,10 +50,25 @@ router.post('/', async (req, res) => {
         }
       }
     } else {
-      res.json({
-        id: 0,
-        error: 'trail not found'
-      })
+      // We must validate username
+      const result = await call(config.nodeURL, 'condenser_api.get_accounts', [[trail]])
+      if (result.length) {
+        const description = 'None'
+        await con.query(
+          'INSERT INTO `trailers`(`user`, `description`) VALUES (?,?)',
+          [trail, description]
+        )
+        await followTrail(trail, username)
+        res.json({
+          id: 1,
+          result: 'Successfully followed!'
+        })
+      } else {
+        res.json({
+          id: 0,
+          error: 'Wrong username'
+        })
+      }
     }
   } else {
     res.json({
@@ -67,5 +77,17 @@ router.post('/', async (req, res) => {
     })
   }
 })
+
+const followTrail = async (trail, username) => {
+  await con.query(
+    'INSERT INTO `followers`(`trailer`,`follower`,`weight`) VALUES (?,?,"5000")',
+    [trail, username]
+  )
+  await con.query(
+    'UPDATE `trailers` SET `followers`=`followers`+1 WHERE `user`=?',
+    [trail]
+  )
+  return 1
+}
 
 module.exports = router
