@@ -2,6 +2,7 @@ const con = require('../../../helpers/mysql')
 const selectExists = require('../../../helpers/select_exists')
 const validateAccount = require('../../../helpers/validateAccount')
 
+/** Return top curation trails by number of followers */
 const getTopTrails = async trail => {
   if (!trail) {
     return {
@@ -22,8 +23,8 @@ const getTopTrails = async trail => {
   )
   if (!selectExists(exists)) {
     return {
-      id: 1,
-      result: { name: trail, followers: 0, description: 'None' }
+      id: 0,
+      error: 'Trail not found'
     }
   }
   const result = await con.query(
