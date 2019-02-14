@@ -21,13 +21,15 @@ const publicCurationTrail = require('./api/public/curation-trail')
 // Processing backend processes (private api)
 const v2Function = require('./api/v2/function')
 
+// Settings imports
+const curationTrailSettings = require('./api/v1.1/settings/curation-trail')
+
 // support json encoded bodies and encoded bodies
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser())
 
 app.use(function (req, res, next) {
-  console.log('TODO: add ENV for development mode')
   /** TODO: add ENV var for development mode */
   const dev = 1
   res.header('Access-Control-Allow-Origin', (dev ? 'http://localhost:4200' : 'https://steemauto.com'))
@@ -56,6 +58,9 @@ app.use('/api/v1.1/curation-trail', curationTrailFront)
 app.use('/api/v2/function', v2Function)
 
 app.use('/api/public/curation-trail', publicCurationTrail)
+
+// All settings APIs
+app.use('/api/v1.1/settings/curation-trail', curationTrailSettings)
 
 const port = process.env.PORT || 3001
 const host = process.env.HOST || '127.0.0.1'
