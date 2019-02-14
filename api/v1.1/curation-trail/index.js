@@ -7,9 +7,14 @@ const toggleTrail = require('./toggleTrail')
 
 router.post('/:id', async (req, res) => {
   switch (req.params.id) {
-    case 'following': {
-      const following = await getFollowing(req.body.user)
-      res.json(following)
+    case 'all_following': {
+      const allFollowing = await getFollowing(req.cookies.username)
+      res.json(allFollowing)
+      break
+    }
+    case 'one_following': {
+      const oneFollowing = await getFollowing(req.cookies.username, req.body.trail)
+      res.json(oneFollowing)
       break
     }
     case 'top_trails': {
