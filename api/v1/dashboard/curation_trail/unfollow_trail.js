@@ -1,6 +1,10 @@
 const express = require('express')
 const router = express.Router()
 const con = require('../../../../helpers/mysql')
+const isAuth = require('../../../../middlewares/is_auth')
+
+// confirm user is authorized
+router.use(isAuth)
 
 // user wants to unfollow a trail
 router.post('/', async (req, res) => {
