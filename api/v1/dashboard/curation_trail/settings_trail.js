@@ -10,14 +10,20 @@ router.post('/', async (req, res) => {
   const enable = req.body.enable
   const votingway = req.body.votingway
   const username = req.cookies.username
+  let type = req.body.type
+  if (type && (type === 2 || type === '2')) {
+    type = 2
+  } else {
+    type = 1
+  }
   if (trail && username && weight && minute && enable && votingway) {
     // we will apply settings if parameters was in expected format
-    const error = isError(weight, minute, enable, votingway)
+    const error = isError(weight, minute, enable, votingway, type)
     if (!error) {
       // First we will make sure that trail exists in steemauto
       let trailExists = await con.query(
-        'SELECT EXISTS(SELECT `user` FROM `trailers` WHERE `user`=?)',
-        [trail]
+        'SELECT EXISTS(SELECT `user` FROM `trailers` WHERE `user`=? AND `type`=?)',
+        [trail, type]
       )
       // MySQL will return result like: [{query: result}]
       // We should select result
@@ -27,8 +33,8 @@ router.post('/', async (req, res) => {
       if (trailExists) {
         // we will make sure user is following that trail
         let exists = await con.query(
-          'SELECT EXISTS(SELECT `follower` FROM `followers` WHERE `trailer`=? AND `follower`=?)',
-          [trail, username]
+          'SELECT EXISTS(SELECT `follower` FROM `followers` WHERE `trailer`=? AND `follower`=? AND `type`=?)',
+          [trail, username, type]
         )
         for (let i in exists[0]) {
           exists = exists[0][i]
@@ -38,8 +44,8 @@ router.post('/', async (req, res) => {
           const weight2 = weight * 100
           await con.query(
             'UPDATE `followers` SET `weight`=?, `aftermin`=?, `votingway`=?, `enable`=?' +
-            'WHERE `trailer`=? AND `follower`=?',
-            [weight2, minute, votingway, enable, trail, username]
+              'WHERE `trailer`=? AND `follower`=? AND `type`=?',
+            [weight2, minute, votingway, enable, trail, username, type]
           )
           res.json({
             id: 1,
@@ -72,7 +78,7 @@ router.post('/', async (req, res) => {
 })
 
 // this function will return true(1) if there was any wrong parameter
-const isError = (weight, minute, enable, votingway) => {
+const isError = (weight, minute, enable, votingway, type) => {
   if (!isNaN(weight) && !isNaN(minute) && !isNaN(enable) && !isNaN(votingway)) {
     weight = Number(weight)
     minute = Number(minute)
@@ -83,7 +89,10 @@ const isError = (weight, minute, enable, votingway) => {
       return 1
     }
     // weight should be between 0.01 and 100
-    if (weight < 0.01 || weight > 100) {
+    if (type === 1 && (weight < 0.01 || weight > 100)) {
+      return 1
+    }
+    if (type === 2 && (weight < -100 || weight > -0.01)) {
       return 1
     }
     // enable is 1 or 0
