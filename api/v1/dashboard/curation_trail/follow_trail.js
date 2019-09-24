@@ -11,12 +11,18 @@ router.use(isAuth)
 router.post('/', async (req, res) => {
   try {
     const trail = req.body.trail
+    let type = req.body.type
     const username = req.cookies.username
+    if (type && (type === 2 || type === '2')) {
+      type = 2
+    } else {
+      type = 1
+    }
     if (trail && username) {
       // First we will make sure that trail exists in steemauto
       let trailExists = await con.query(
-        'SELECT EXISTS(SELECT `user` FROM `trailers` WHERE `user`=?)',
-        [trail]
+        'SELECT EXISTS(SELECT `user` FROM `trailers` WHERE `user`=? AND `type`=?)',
+        [trail, type]
       )
       // MySQL will return result like: [{query: result}]
       // We should select result
@@ -33,15 +39,15 @@ router.post('/', async (req, res) => {
         } else {
           // we will make sure user is not already followed that trail
           let exists = await con.query(
-            'SELECT EXISTS(SELECT `follower` FROM `followers` WHERE `trailer`=? AND `follower`=?)',
-            [trail, username]
+            'SELECT EXISTS(SELECT `follower` FROM `followers` WHERE `trailer`=? AND `follower`=? AND `type`=?)',
+            [trail, username, type]
           )
           for (let i in exists[0]) {
             exists = exists[0][i]
           }
           if (!exists) {
             // Follow trail and increase the number of followers
-            await followTrail(trail, username)
+            await followTrail(trail, username, type)
             res.json({
               id: 1,
               result: 'Successfully followed with default settings!'
@@ -55,7 +61,11 @@ router.post('/', async (req, res) => {
         }
       } else {
         // We must validate username
-        const result = await call(config.nodeURL, 'condenser_api.get_accounts', [[trail]])
+        const result = await call(
+          config.nodeURL,
+          'condenser_api.get_accounts',
+          [[trail]]
+        )
         if (result.length) {
           // const description = 'None'
           // await con.query(
@@ -92,16 +102,16 @@ router.post('/', async (req, res) => {
   }
 })
 
-const followTrail = async (trail, username) => {
+const followTrail = async (trail, username, type) => {
   // we used SHA2 to create unique hash for pair of trail and user
   // this will prevent duplicate insert to the database
   await con.query(
-    'INSERT INTO `followers`(`trailer`,`follower`,`weight`,`hash`) VALUES (?,?,"5000",SHA2(?, 256))',
-    [trail, username, trail + username]
+    'INSERT INTO `followers`(`trailer`,`follower`,`weight`,`hash`, `type`) VALUES (?,?,"5000",SHA2(?, 256), ?)',
+    [trail, username, trail + username, type]
   )
   await con.query(
-    'UPDATE `trailers` SET `followers`=`followers`+1 WHERE `user`=?',
-    [trail]
+    'UPDATE `trailers` SET `followers`=`followers`+1 WHERE `user`=? AND `type`=?',
+    [trail, type]
   )
   return 1
 }
